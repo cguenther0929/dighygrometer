@@ -1,0 +1,7 @@
+!private/
+!build/
+!debug/
+!THV_MPLAB.X/
+src/stdbool.h
+src/stdint.h
+src/pic18f25k80.h
