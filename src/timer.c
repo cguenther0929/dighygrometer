@@ -3,11 +3,11 @@
 *
 *   PURPOSE: Source file containing all timer-related routines.  
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *
@@ -21,87 +21,88 @@
 struct GlobalInformation gblinfo;
 
 void Timer0On( void ){
-    TMR0H = TMR0HIGH;                   	//Load the high register for the timer (16MHz and prescaler of 64)
-    TMR0L = TMR0LOW;                   	//Load the low register for the timer   (16MHz and prescaler of 64)
+    #ifndef TMR0HIGH                    //Assume TMR0LOW is also not defined
+        TMR0H = 248;                   //Load the high register for the timer (16MHz and prescaler of 64)
+        TMR0L = 47;                   	//Load the low register for the timer   (16MHz and prescaler of 64)
+    #else
+        TMR0H = TMR0HIGH;                   	//Load the high register for the timer (16MHz and prescaler of 64)
+        TMR0L = TMR0LOW;                   	//Load the low register for the timer   (16MHz and prescaler of 64)
+    #endif
     TMR0ON = 1;                 	//Set the bit to turn on the timer
 }
 
 void Timer0Init(uint8_t interrupts, uint8_t prescaler, uint8_t clksource ) {
-    //T0CONbits.T0CS = 0;               //Increment on FOSC/4 edges
     T0CONbits.T08BIT = 0;             //We want this timer to run in 16bit mode.
-    T0CONbits.T0SE = 1;               //Increment timer on low to high input (when clock source is T0CKI)
-    // switch(interrupts){
-        // case 0:
-            // INTCONbits.TMR0IE = 0;     //Do not cause an interrupt
-            // break;
-        // case 1:
-            // INTCONbits.TMR0IE = 1;     //Cause an interrupt
-            // TMR0IP = 0;     //We want this to be a low priority interrupt
-            // break;
-        // default:
-            // INTCONbits.TMR0IE = 0;     //Default is do not cause an interrupt
-            // break;
-
-    // }
     
-    INTCONbits.TMR0IE = 1;     //Cause an interrupt
-    T0CONbits.PSA = 0;
-    T0CONbits.T0PS = 0;
+    switch(interrupts){
+        case 0:
+            INTCONbits.TMR0IE = 0;     //Do not cause an interrupt
+            break;
+        case 1:
+            INTCONbits.TMR0IE = 1;     //Cause an interrupt
+            TMR0IP = 0;                //We want this to be a low priority interrupt
+            break;
+        default:
+            INTCONbits.TMR0IE = 0;     //Default is do not cause an interrupt
+            break;
 
-    // switch (prescaler){     //Set the prescaler
-        // case 1:         //User wished not to use prescaler.  Will run FOSC/4
-            // T0CONbits.PSA = 1;
-            // break;
-        // case 2:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 0;
-            // break;
-        // case 4:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 1;
-            // break;
-        // case 8:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 2;
-            // break;
-        // case 16:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 3;
-            // break;
-        // case 32:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 4;
-            // break;
-        // case 64:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 5;
-            // break;
-        // case 128:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 6;
-            // break;
-        // case 256:
-            // T0CONbits.PSA = 0;
-            // T0CONbits.T0PS = 7;
-            // break;
-        // default:                //Will not use the prescaler
-            // T0CONbits.PSA = 1;
-            // break;
-    // }
+    }
     
-    T0CONbits.T0CS = 0;
+    switch (prescaler){     //Set the prescaler
+        case 1:         //User wished not to use prescaler.  Will run FOSC/4
+            T0CONbits.PSA = 1;
+            break;
+        case 2:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 0;
+            break;
+        case 4:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 1;
+            break;
+        case 8:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 2;
+            break;
+        case 16:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 3;
+            break;
+        case 32:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 4;
+            break;
+        case 64:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 5;
+            break;
+        case 128:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 6;
+            break;
+        case 256:
+            T0CONbits.PSA = 0;
+            T0CONbits.T0PS = 7;
+            break;
+        default:                //Will not use the prescaler
+            T0CONbits.PSA = 1;
+            break;
+    }
+    
+    // T0CONbits.T0CS = 0;   //TODO remove line
 
-    // switch(clksource){
-        // case 0:             //Use the internal instruction clock (FOSC/4)
-            // T0CONbits.T0CS = 0;
-            // break;
-        // case 1:         //use external clock on T0CKI pin
-            // T0CONbits.T0CS = 1;
-            // break;
-        // default:
-            // T0CONbits.T0CS = 0;  //Default is to use internal clock source
-            // break;
-    // }
+    switch(clksource){
+        case 0:             //Use the internal instruction clock (FOSC/4)
+            T0CONbits.T0CS = 0;
+            break;
+        case 1:         //use external clock on T0CKI pin
+            T0CONbits.T0CS = 1;
+            T0CONbits.T0SE = 1;               //Increment timer on low to high input (when clock source is T0CKI) 
+            break;
+        default:
+            T0CONbits.T0CS = 0;  //Default is to use internal clock source
+            break;
+    }
 }
 
 void Timer1Init( bool interrupts, uint8_t prescaler, bool clksource ) {
@@ -122,8 +123,6 @@ void Timer1Init( bool interrupts, uint8_t prescaler, bool clksource ) {
 
     }
     
-    //PIE1bits.TMR1GIE = 0; //TODO need to figure out what this does
-
     switch (prescaler){     //Set the prescaler
         case 1:         //User wished not to use prescaler.  Will run FOSC/4
             T1CKPS1 = 0;

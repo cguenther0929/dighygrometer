@@ -3,11 +3,11 @@
 *
 *   PURPOSE: Header file for i2c.c
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *
@@ -23,11 +23,12 @@
 #include <stdbool.h>
 #include "main.h"
 
+
 /* MASTER MODE CLOCK RATE */
-#define Oscillator      8000000                     //Device oscillator value
-#define I2CCLOCK        100000                      //I2C Clock Value   
+#define Oscillator      16000000                     //Device oscillator value
+#define I2CCLOCK        400000                      //I2C Clock Value   
 #define BaudValue       (Oscillator/(4*I2CCLOCK)) - 1     //Value for SSPADD register (master-mode only)          
-#define i2cdelay        50
+#define i2cdelay        10
 
 /* DEFINE SPECIAL SFR NAMES FOR I2CxSTAT REGISTER */
 #define I2CACKBit       SSPCON2bits.ACKDT       //Intelligent mnemonic for defining the ACK/NACK bit.
@@ -66,24 +67,26 @@
 ********************************************************/
 void I2Cinit( void );
 
-/********************************************************  //TODO fix comment 
+/********************************************************  
 *FUNCTION: uint8_t ReadI2C(uint8_t addr)
-*PURPOSE: Send 7 bit addr To read 8 bits from the A/D
-*PRECONDITION: Bus needs to be idle. Pull in address
-*POSTCONDITION: 16 Data bits will be returned
-*RETURN: 16 Bits of binary data (VDD/1024)*VALUE
+*PURPOSE: To read a byte of data over the I2C bus.  
+*PRECONDITION: I2C module must be configured.
+*       Bus needs to be idle. Must pass functions proper
+*       addresses.  
+*POSTCONDITION: BYTE of data will be returned to application
+*RETURN: The BYTE that was read over the bus
 ********************************************************/
-uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress);     //TODO add comment
+uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress);
 
-void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata);
-
-
-/********************************************************
-*FUNCTION: 
-*PURPOSE: 
-*PRECONDITION: 
-*POSTCONDITION: 
-*RETURN: 
+/********************************************************  
+*FUNCTION: void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata)
+*PURPOSE: Write a BYTE of data over the I2C bus.  
+*PRECONDITION: I2C module must be configured.
+*       Bus needs to be idle. Must pass in proper
+*       addresses and data to be sent
+*POSTCONDITION: BYTE of data written over bus
+*RETURN: Nothing
 ********************************************************/
+void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata);  
 
 #endif

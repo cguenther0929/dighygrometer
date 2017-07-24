@@ -3,11 +3,11 @@
 *
 *   PURPOSE: Header file for timer.c
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *

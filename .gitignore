@@ -1,3 +1,4 @@
+# List of folders & file names/extensions to be ignored by the git repository.
 !private/
 !build/
 !debug/
@@ -5,3 +6,9 @@
 src/stdbool.h
 src/stdint.h
 src/pic18f25k80.h
+
+PTE_Interface_Panel.X/funclist
+PTE_Interface_Panel.X/l.obj
+PTE_Interface_Panel.X/build
+PTE_Interface_Panel.X/dist
+PTE_Interface_Panel.X/nbproject/*

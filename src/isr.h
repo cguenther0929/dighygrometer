@@ -3,11 +3,11 @@
 *
 *   PURPOSE: Header file for isr.c
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *
@@ -21,7 +21,6 @@
 #include <xc.h>                 //Part specific header file
 #include <stdint.h>
 #include <stdbool.h>
-//#include "type.h"
 #include "config.h"             //Project specific header file
 #include "main.h"
 #include "struct.h"
@@ -75,12 +74,44 @@ void DisableInterrupts( void );
 ********************************************************/
 void EnableInterrupts( void );
 
-void Events1ms(void);  //TODO need to comment
+/********************************************************
+*FUNCTION: void Events10ms(void)
+*PURPOSE: Runs on a 1 millisecond interrupt boundary.  
+*       This routine shall be kept slim!
+*PRECONDITION: Interrupts and time base should be setup
+*POSTCONDITION: Action taken on a 1ms boundary
+*RETURN: Nothing
+********************************************************/
+void Events10ms(void);  
 
-void Events100ms(void);     //TODO need to comment
+/********************************************************
+*FUNCTION: void Events100ms(void)
+*PURPOSE: Runs on a 100 millisecond interrupt boundary.  
+*       This routine shall be kept slim!
+*PRECONDITION: Interrupts and time base should be setup
+*POSTCONDITION: Action taken on a 100ms boundary
+*RETURN: Nothing
+********************************************************/
+void Events100ms(void); 
 
-void Events1000ms(void);        //TODO need to comment
+/********************************************************
+*FUNCTION: void Events1000ms(void)
+*PURPOSE: Runs on a 1000 millisecond interrupt boundary.  
+*       This routine shall be kept slim!
+*PRECONDITION: Interrupts and time base should be setup
+*POSTCONDITION: Action taken on a 1000ms boundary
+*RETURN: Nothing
+********************************************************/
+void Events1000ms(void);       
 
+/********************************************************
+*FUNCTION: void PORTBINTSetup( void )
+*PURPOSE: Initialize interrupts (i.e. INT0)
+*PRECONDITION: None
+*POSTCONDITION: INTx interrupts now setup 
+*RETURN: Nothing
+********************************************************/
+void PORTBINTSetup( void );     
 
 #endif
 /* END OF FILE */

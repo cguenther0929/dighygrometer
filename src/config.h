@@ -4,11 +4,11 @@
 *   PURPOSE: Configuration file specific to the processor being used and the 
 *           underlying hardware. 
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PPIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *
@@ -26,68 +26,29 @@
 /* DEFINE CODE VERSION NUMBER */
 #define MAJVER              0x00
 #define MINVER              0x00
-#define BUGVER              0x02
+#define BUGVER              0x01
 
+/* DEFINES FOR STATUS GPIO */
+#define PULSEOUT              LATBbits.LATB5
 
-/* DEFINES FOR STATUS LEDS */
-#define HBLED               LATCbits.LATC0
-#define REDLED              LATCbits.LATC1
-#define GRNLED              LATCbits.LATC5
-#define YELLED              LATCbits.LATC2
+/* DEFINES FOR POWER CONTROL*/  
+#define DISP_PWR_EN_n       LATEbits.LATE7      //Assert low to enable power to the display
+#define PIEZ_KILL           LATEbits.LATE6      //Assert high to kill stored power keeping power to the MCU.
+#define MCU_PWR_LATCH       LATEbits.LATE5      //Assert high to keep power to the MCU    
 
-/* CAN ADDRESS BITS */
-#define b0                  PORTAbits.RA3
-#define b1                  PORTAbits.RA5
-#define b2                  PORTAbits.RA7
-#define b3                  PORTAbits.RA6
+/* DEFINES FOR LCD PINS*/
+#define DISP_BYTE           LATD                //Port that connects to dispaly
+#define DISP_RS             LATEbits.LATE2      //Register Select signal. RS=0=Command, RS=1=Data
+#define DISP_RW             LATEbits.LATE1      //Read/Write. R/W=1=Read; R/W=0=Write 
+#define DISP_E              LATEbits.LATE0      //Operation enable (falling edge to trigger)
+#define disp_write          0
+#define disp_read           1
+#define disp_command        0
+#define disp_data           1
 
-/* REGISTER VALUES FOR TIME BASE */
-#define TMR0HIGH            248        //Defined assuming 16MHz internal oscillator and prescaler of 64 interrupt every 1ms
-#define TMR0LOW             47         //Defined assuming 16MHz internal oscillator and prescaler of 64 interrupt every 1ms
-
-
-#define TMR1HIGH            252        //Defined assuming 16MHz internal oscillator and prescaler of 64 interrupt every 1ms
-#define TMR1LOW             23         //Defined assuming 16MHz internal oscillator and prescaler of 64 interrupt every 1ms
-
-/* I2C ADDDRESSES FOR ACCELEROMETER */
-#define AccBaseAddr         0x19        //Base (7 bit) address of accelerometer
-#define AccIDReg_r          0x0F
-#define AccStatusReg_r      0x27        
-#define AccXLo_r            0x28
-#define AccXHi_r            0x29
-#define AccYLo_r            0x2A
-#define AccYHi_r            0x2B
-#define AccZLo_r            0x2C
-#define AccZHi_r            0x2D
-#define AccIntSrc_r         0x31
-#define AccClickSrc_r       0x39
-#define AccStatusAux_rw     0x07       
-#define AccTempCfg_rw       0x1F       //Will always return 0x33
-#define AccCtrl1_rw         0x20       //Data rate and axis enables defined here
-#define AccCtrl2_rw         0x21       //Define data filters
-#define AccCtrl3_rw         0x22       //For manipulated interrupts
-#define AccCtrl4_rw         0x23       //Set sensitivity via this register
-#define AccCtrl5_rw         0x24
-#define AccCtrl6_rw         0x25
-#define AccFIFOCtrl_rw      0x2E
-#define AccIntCfg_rw        0x30
-#define AccIntThs_rw        0x32
-#define AccIntDura_rw       0x33
-#define AccClickCfg_rw      0x38
-#define AccClickThs_rw      0x3A
-#define AccTimeLimit_rw     0x3B
-#define AccTimeLatency_rw   0x3C
-#define AccTimeWindow_rw    0x3D
-
-/* ACCELEROMETER-RELATED PARAMETERS*/
-#define AVG100MS_ACCEL      0.03        //300Hz sample rate, so sample every 3ms.  100ms/3ms ~= 33 samples in window.  So 1/33 = 0.03
-#define AVG500MS_ACCEL      0.006       //300Hz sample rate, so sample every 3ms.  500ms/3ms ~= 166 samples in window.  So 1/166 = 0.006
-#define AVG1000MS_ACCEL     0.003       //300Hz sample rate, so sample every 3ms.  500ms/3ms ~= 333 samples in window.  So 1/333 = 0.003
-
-#define X_AXIS              1           //Mnemonic for identifying which axis has the largest magnitude 
-#define Y_AXIS              2           //Mnemonic for identifying which axis has the largest magnitude 
-#define Z_AXIS              3           //Mnemonic for identifying which axis has the largest magnitude 
-
+/* REGISTER VALUES FOR TIME BASE */         
+#define TMR0HIGH            254                 //Defined assuming 8MHz internal oscillator and prescaler of 64 interrupt every 1ms 
+#define TMR0LOW             199                 //Defined assuming 8MHz internal oscillator and prescaler of 64 interrupt every 1ms
 
 /* I2C ADDDRESSES FOR HUMIDITY SENSOR */
 #define HumBaseAddr         0x5F
@@ -121,16 +82,7 @@
 #define output              0           //Define the output pin direction setting
 #define input               1
 
-#define ledon               0           //LEDs are active low
-#define ledoff              1           //LEDs are active low
+/* BATTERY STATUS DEFINES */
+#define BAT_VOLT_MIN        2.5         //TODO -- may need to revisit this range...
 
-/* DEFINES FOR EEPROM */
-#define CALID              	0x00 		//Start Address in EEPROM where the calibration identifier is located
-#define XMSB              	0x01        //Start Address in EEPROM where the X-axis MSB calibration nibble is stored
-#define XLSB              	0x02        //Start Address in EEPROM where the X-axis LSB calibration nibble is stored
-#define YMSB                0x03        //Start Address in EEPROM where the Y-axis MSB calibration nibble is stored
-#define YLSB                0x04        //Start Address in EEPROM where the Y-axis LSB calibration nibble is stored
-#define ZMSB                0x05        //Start Address in EEPROM where the Z-axis MSB calibration nibble is stored
-#define ZLSB                0x06        //Start Address in EEPROM where the Z-axis LSB calibration nibble is stored
-
- #endif
+#endif

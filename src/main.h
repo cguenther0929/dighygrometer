@@ -3,11 +3,11 @@
 *
 *   PURPOSE: Header file for main.c
 *
-*   DEVICE: PIC18F25K80
+*   DEVICE: PIC18F66K22
 *
 *   COMPILER: Microchip XC8 v1.32
 *
-*   IDE: MPLAB X v1.60
+*   IDE: MPLAB X v3.45
 *
 *   TODO:  
 *
@@ -27,12 +27,13 @@
 #include "isr.h"
 #include "config.h"     //Project specific header file
 #include "timer.h"
-#include "can.h"
+#include "adc.h"
+#include "dispdriver.h"
 
 #define TEMP 65577
 
 /********************************************************
-*FUNCTION: void tick100mDelay( uint16_t tick100ms )
+*FUNCTION: void tick100mDelay( uint16_t ticks )
 *PURPOSE: Much more accurate timer that works off interrupts
             User must define how many 1/10s of a tick1000mond he/she
             wishes to pass
@@ -40,17 +41,17 @@
 *POSTCONDITION: tick100ms * 1/10s of a tick1000mond have passed.
 *RETURN: Nothing
 ********************************************************/
-void tick100mDelay( uint16_t tick100ms );
+void tick100mDelay( uint16_t ticks );
 
 /********************************************************
-*FUNCTION: void tick1mDelay( uint16_t tick1ms )
+*FUNCTION: void tick10msDelay( uint16_t ticks )
 *PURPOSE: Much more accurate timer that works off interrupts
             User passes in how many 1/50s he/she wishes to pass 
 *PRECONDITION: Timer0 set up and running and set to interrupt
 *POSTCONDITION: Blocking delay inserted
 *RETURN: Nothing
 ********************************************************/
-void tick1mDelay( uint16_t tick1ms );
+void tick10msDelay( uint16_t ticks );
 
 /********************************************************
 *FUNCTION: void SetUp( void );
@@ -61,28 +62,37 @@ void tick1mDelay( uint16_t tick1ms );
 ********************************************************/
 void SetUp( void );
 
-void TaskUpdate (void);         //TODO need to comment
+/********************************************************
+*FUNCTION: void TempHumidityInitialize(void)
+*PURPOSE: Initialize the Temp/Humidity sensor.  
+*       Temp and Humidity is linearly extrapolated from line 
+*       equations that can be built using calibration data 
+*       stored in internal registers.  This function pulls in
+*       these calibration constants, and 'builds' the line 
+*       equations.  
+*PRECONDITION: PIC must be completely setup and I2C bus configured
+*POSTCONDITION: Temp/Humidity Line Equations Developed
+*RETURN: Nothing
+********************************************************/
+void TempHumidityInitialize(void);      
 
-void TempHumidityInitialize(void);      //TODO need to comment 
+/********************************************************
+*FUNCTION: void ReportTH( void )
+*PURPOSE: Report temperature and humidity over CAN bus
+*PRECONDITION: I2C and CAN must be configured
+*POSTCONDITION: Temperature and Humidity data is broadcast
+*           out over the CAN bus
+*RETURN: Nothing
+********************************************************/
+void UpdateTH( void );  
 
-void AccelTest(void);       //TODO this was only put in for testing
+/* TODO NEED TO COMMENT */
+void UpdateDisplay( void );
 
-void THtest(void);       //TODO this was only put in for testing
+/* TODO COMMENT */
+void BatteryStatus( void );
 
-void HandleNewAccelData( void );    //TODO comment
-
-void BcastAccelRollingAverage( void ); //TODO comment 
-
-void ReportLevelData( void );
-
-void GrabHWid(void);  //TODO comment
-
-void StoreCalibrationValues(void); //TODO comment
-
-//               1 = Enable; 0 = Disable
-//                  |       1 = Rising edge 0 = Falling edge
-//                  |           |
-void INT0Setup(uint8_t State, uint8_t Edge);  //--Fix comment
-
+/* TODO REMOVE THIS TEST FUNCTION */
+void UnitTest( void );     
 
 #endif
