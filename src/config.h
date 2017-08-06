@@ -29,7 +29,7 @@
 #define BUGVER              0x01
 
 /* DEFINES FOR STATUS GPIO */
-#define PULSEOUT              LATBbits.LATB5
+#define PULSEOUT            LATBbits.LATB5
 
 /* DEFINES FOR POWER CONTROL*/  
 #define DISP_PWR_EN_n       LATEbits.LATE7      //Assert low to enable power to the display
@@ -47,8 +47,8 @@
 #define disp_data           1
 
 /* REGISTER VALUES FOR TIME BASE */         
-#define TMR0HIGH            254                 //Defined assuming 8MHz internal oscillator and prescaler of 64 interrupt every 1ms 
-#define TMR0LOW             199                 //Defined assuming 8MHz internal oscillator and prescaler of 64 interrupt every 1ms
+#define TMR0HIGH            251                 //Defined assuming 500kHz internal oscillator and prescaler of 1 interrupt every 10ms 
+#define TMR0LOW             29                  //Defined assuming 500kHz internal oscillator and prescaler of 1 interrupt every 10ms
 
 /* I2C ADDDRESSES FOR HUMIDITY SENSOR */
 #define HumBaseAddr         0x5F
@@ -83,6 +83,6 @@
 #define input               1
 
 /* BATTERY STATUS DEFINES */
-#define BAT_VOLT_MIN        2.5         //TODO -- may need to revisit this range...
+#define BAT_VOLT_MIN        2.5         //Battery voltage at or below this value will trip the alert message          
 
 #endif

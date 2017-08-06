@@ -25,8 +25,8 @@
 
 
 /* MASTER MODE CLOCK RATE */
-#define Oscillator      16000000                     //Device oscillator value
-#define I2CCLOCK        400000                      //I2C Clock Value   
+#define Oscillator      500000                    //Device oscillator value
+#define I2CCLOCK        50000                      //I2C Clock Value   
 #define BaudValue       (Oscillator/(4*I2CCLOCK)) - 1     //Value for SSPADD register (master-mode only)          
 #define i2cdelay        10
 

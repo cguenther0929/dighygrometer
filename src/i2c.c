@@ -44,7 +44,6 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     I2CGenStart = 1; 			        //Generate the start condition
     while(I2CGenStart == 1);        //Bit will automatically get cleared in HW
     if (WCOL1 == 1){             //Bus collision detected (p.320)
-        // REDLED = ledon;     
         WCOL1=0;
         return;
     }
@@ -55,7 +54,6 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     SSPBUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
 
     if (WCOL1 == 1){             //Bus collision detected (p.320)
-        // REDLED = ledon;             
         WCOL1=0;
         return;
     }
@@ -63,7 +61,6 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
     
     if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;                 
         return;
     }
     
@@ -75,7 +72,6 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
     
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;                 
         return;
     }
 	
@@ -87,7 +83,6 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
 
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;             
         return;
     }
     
@@ -119,30 +114,24 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     while(SEN1 == 1);        //Bit will automatically get cleared in HW
     
     if (WCOL1 == 1){                     //Bus collision detected (p.320)
-        // REDLED = ledon;                 
         WCOL1=0;
         return 0;
     }
-    
 
     SSPBUF = tempaddr;			//First send SAD + W
     
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
     
-    
     while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
     for(i=0;i<i2cdelay;i++);    //Some delay for safety
     
     if (WCOL1 == 1){             //Bus collision detected (p.320)
-        // REDLED = ledon;             
         WCOL1=0;
         return 0;
     }
-
         
     if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;                 
         return 0;
     }
 
@@ -155,7 +144,6 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     for(i=0;i<i2cdelay;i++);    //Some delay to allow for ACK/NACK bit
     
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;                 
         return 0;
     }
     
@@ -171,7 +159,6 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     
     
     if (WCOL1 == 1){             //Bus collision detected (p.320)
-        // REDLED = ledon;         
         WCOL1=0;
         return 0;
     }
@@ -181,7 +168,6 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     for(i=0;i<i2cdelay;i++);    //Some delay for ACK/NACK setup
     
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-        // REDLED = ledon;                 
         return 0;
     }
 	
@@ -193,10 +179,17 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     I2CRecEnable = 1;               //Enable I2C Receiver
     while(I2CRecEnable == 1){}
     
-    I2CACKBit = NACK;               //Set the ACK/NACK bit to ACK
+    I2CACKBit = NACK;               //Set the ACK/NACK bit to NACK to end transmission
     SSPIF = 0;
     I2CGenACK = 1;                  //Assert acknowledge on I2C bus for slave to see
-    while(I2CGenACK == 1);
+	for(i=0;i<i2cdelay;i++);
+    
+    i=0;
+    while(I2CGenACK == 1){
+        i++;
+        if(i==10)
+            break;
+    }
  
     rtndata = SSPBUF;               //Should automatically clear BF flag (defined by I2CBF)
 
@@ -204,7 +197,14 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     
     SSPIF = 0;
     I2CGenStop = 1;					//Create the STOP condition on the bus
-    while(SSPIF == 0);         //Bit set when stop condition complete
+	for(i=0;i<i2cdelay;i++);
+    
+    i=0;
+    while(SSPIF == 0){
+        i++;
+        if(i==10)
+            break;
+    }
     
     return (rtndata);               //Return data in form xxxxxx(b9)(b8)(b7)(b6)(b5)(b4)(b3)(b2)(b1)(b0)
 }

@@ -89,8 +89,6 @@ void Timer0Init(uint8_t interrupts, uint8_t prescaler, uint8_t clksource ) {
             break;
     }
     
-    // T0CONbits.T0CS = 0;   //TODO remove line
-
     switch(clksource){
         case 0:             //Use the internal instruction clock (FOSC/4)
             T0CONbits.T0CS = 0;

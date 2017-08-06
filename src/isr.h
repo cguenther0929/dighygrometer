@@ -105,13 +105,15 @@ void Events100ms(void);
 void Events1000ms(void);       
 
 /********************************************************
-*FUNCTION: void PORTBINTSetup( void )
+*FUNCTION: void PORTBINTSetup( uint8_t channel )
 *PURPOSE: Initialize interrupts (i.e. INT0)
-*PRECONDITION: None
+*PRECONDITION: Interrupts must be enabled.  Not that defineing
+* as high priority will require the flag be moved into the 
+* appropriate ISR function.  
 *POSTCONDITION: INTx interrupts now setup 
 *RETURN: Nothing
 ********************************************************/
-void PORTBINTSetup( void );     
+void PORTBINTSetup( uint8_t channel, bool edge_rising, bool highpri );     
 
 #endif
 /* END OF FILE */

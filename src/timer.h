@@ -21,7 +21,6 @@
 #include <xc.h>                 //Part specific header file
 #include <stdint.h>
 #include <stdbool.h>
-//#include "type.h"
 #include "config.h"             //Project specific header file
 
 /********************************************************

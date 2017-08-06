@@ -86,13 +86,16 @@ void TempHumidityInitialize(void);
 ********************************************************/
 void UpdateTH( void );  
 
-/* TODO NEED TO COMMENT */
-void UpdateDisplay( void );
-
-/* TODO COMMENT */
+/********************************************************
+*FUNCTION: void BatteryStatus( void )
+*PURPOSE: Measure battery voltage and determine if value
+* is too low
+*PRECONDITION: Appropriate analog channel shall be enabled
+* and A2D shall be setup and configured.  
+*POSTCONDITION: Battery voltage measured and battery state
+* (either fine or too low) is known
+*RETURN: Nothing
+********************************************************/
 void BatteryStatus( void );
-
-/* TODO REMOVE THIS TEST FUNCTION */
-void UnitTest( void );     
 
 #endif

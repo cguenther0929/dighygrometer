@@ -21,52 +21,71 @@
 struct GlobalInformation gblinfo;
 
 void Init_Interrupts( void ) {
+
     IPEN = 1;           //This allows interrupts to be defined a priority (either high or low) -- see page 103/380
     GIEH = 1;           //Enable all interrupts with high priority
     GIEL = 1;           //Enable all interrupts with low priority
 
 }
 
-void PORTBINTSetup( void ){
-	
-    /* SETUP FOR INT 0*/
-    INT0IF = 0;     //Clear this flag before enabling interrupt 
-    INT0IE = 1;     //Enable the INT0 interrupt
-    
-    /* SETUP FOR INT 1*/
-    //INT1IF = 0;     //Clear this flag before enabling interrupt 
-    //INT1IP = 0;     //Define this to be low priority
-    //INT1IE = 1;     //Enable the INT0 interrupt
-    
-    /* SETUP FOR INT 2*/
-    //INT2IF = 0;     //Clear this flag before enabling interrupt 
-    //INT2IP = 0;     //Define this to be low priority
-    //INT2IE = 1;     //Enable the INT0 interrupt
+void PORTBINTSetup( uint8_t channel, bool edge_rising, bool highpri ) {
+	switch (channel) {
+        case 0: 
+            //No option to set priority on this interrupt -- it is always high!
+            TRISB0 = input;
+            INT0IF = 0;     //Clear this flag before enabling interrupt 
+            INT0IE = 1;     //Enable the INT0 interrupt
+            (edge_rising == true)?(INTEDG0 = 1):(INTEDG0 = 1);
+        break;
+        
+        case 1:
+            TRISB1 = input;
+            INT1IF = 0;     //Clear this flag before enabling interrupt 
+            INT1IE = 1;     //Enable INT1 interrupt 
+            (highpri == true) ? (INT1IP = 1):(INT1IP = 0);
+            (edge_rising == true)?(INTEDG1 = 1):(INTEDG1 = 1);
+        break;
+        
+        case 2:
+            TRISB2 = input;
+            INT2IF = 0;     //Clear this flag before enabling interrupt 
+            INT2IE = 1;     //Enable the INT2 interrupt
+            (highpri == true) ? (INT2IP = 1):(INT2IP = 0);
+            (edge_rising == true)?(INTEDG2 = 1):(INTEDG2 = 1);
+        break;
+
+        default:
+        
+        break;
+
+    }
 
 }
 
-
 void interrupt high_priority edges_isr( void ) {     
+    
+    if(INTCONbits.INT0IF){
+        INTCONbits.INT0IF = 0;
+    }
+    
+    // if(INTCON3bits.INT1IF){
+    //     INTCON3bits.INT1IF = 0;     //Clear the interrupt flag
+    //     INTCON3bits.INT1IE = 0;     //Clear the interrupt flag
+    // }
+    
+    if(INTCON3bits.INT2IF){
+        INTCON3bits.INT2IF = 0;     //Clear the interrupt flag
+    }
 
-    // if(RXB0IF){         //CAN Message Buffer contains message
-    //     gblinfo.canmsgrxed = TRUE;      
-    //     PIE5bits.RXB0IE = 0;     //Interrupt disabled until message is processed.  p.406 in datasheet for more info
-    //     PIR5bits.RXB0IF = 0;     //Clear this just to be safe
-    // }
-    
-    // if(TXB0IF){
-    //     TXB0IF = 0;         //Clear the interrupt flag
-    // }
-    
-    // if(INT0IF){
-    //     INT0IF = 0;                             
-    // }
+    if(INTCON3bits.INT3IF) {
+        INTCON3bits.INT3IF = 0;     //Clear the interrupt flag
+    }
+
 }
 
 void interrupt low_priority main_isr( void ) {
-    // if(TMR0IF) {                            //Timer 0 interrupt flag has been set
-    //     TMR0IF = 0;                         //Software is responsible for clearing this flag
-    // }
+
+    uint8_t temp = 0;
     
     if(TMR0IF){                                     //Timer 1 interrupt
         TMR0H = TMR0HIGH;                        //Load the high register for the timer -- looking for 1/100 of a tick1000ms
@@ -74,13 +93,13 @@ void interrupt low_priority main_isr( void ) {
         
         Events10ms();
         
-        if(gblinfo.tick10ms == 9) {
+        if(gblinfo.tick10ms >= 9) {
             gblinfo.tick10ms = 0;               //Reset centi-tick1000monds
             Events100ms();
-            if(gblinfo.tick100ms == 9) {         //Once Second Reached
+            if(gblinfo.tick100ms >= 9) {         //Once Second Reached
                 gblinfo.tick100ms = 0;           //Reset 100 milliseconds ounter
                 Events1000ms();                 //Look at events that are to happen every 1s
-                if(gblinfo.tick1000ms == 59)                     //We've ticked away one minute, so reset
+                if(gblinfo.tick1000ms >= 59)                     //We've ticked away one minute, so reset
                     gblinfo.tick1000ms = 0;                      //Reset seconds counter
                 else
                     gblinfo.tick1000ms += 1;                     //Increment seconds counter
@@ -96,21 +115,25 @@ void interrupt low_priority main_isr( void ) {
         TMR0IF = 0;                         //Software is responsible for clearing this flag
     }   /* END IF FOR TMR1IF */
     
-    if(PIR2bits.TMR3IF){
-        PIR2bits.TMR3IF = 0;                     //Clear the interrupt flag  
-    } /* END IF FOR TMR3IF */
-    
-    if(INT0IF){
-        INT0IF = 0;                             
-    }
-    
+    // if(PIR2bits.TMR3IF){
+        // PIR2bits.TMR3IF = 0;                     //Clear the interrupt flag  
+    // } /* END IF FOR TMR3IF */
+
+
     if(INT1IF){
-        INT1IF = 0;     //Clear the interrupt flag
+        INTCON3bits.INT1IF = 0;     //Clear the interrupt flag
+        if(RB1 == 1){
+            gblinfo.wakeedge = true;
+        }
     }
     
-    if(INT2IF){
-        INT2IF = 0;     //Clear the interrupt flag
-    }
+    // if(INTCON3bits.INT2IF){
+    //     INTCON3bits.INT2IF = 0;     //Clear the interrupt flag
+    // }
+
+    // if(INTCON3bits.INT3IF) {
+    //     INTCON3bits.INT3IF = 0;     //Clear the interrupt flag
+    // }
     
 } /* END void interrupt low_priority main_isr( void ) */
 
