@@ -105,17 +105,17 @@ void main()
         
         PrintUnsignedDecimal(gblinfo.int_hum_val);
         DispSendChar('%',false);
-        tick100mDelay(50);
+        tick100mDelay(10);
 
         /* THE FOLLOWING IS THE BATTERY TEST */
-        BatteryStatus();        //Determine Battery Voltage
-        if(gblinfo.bat_low == true) {
-            ClearDisp();
-            CursorHome();
-            PrintFloat(gblinfo.battery_voltage);
-            DispSendChar('*',false);
-            tick100mDelay(10);
-        }
+        // BatteryStatus();        //Determine Battery Voltage
+        // if(gblinfo.bat_low == true) {
+        //     ClearDisp();
+        //     CursorHome();
+        //     PrintFloat(gblinfo.battery_voltage);
+        //     DispSendChar('*',false);
+        //     tick100mDelay(10);
+        // }
 
         DisplayOFF();                   //Sleep display for ultra low power draw
         
