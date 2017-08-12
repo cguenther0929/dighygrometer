@@ -28,7 +28,7 @@
 #define Oscillator      500000                    //Device oscillator value
 #define I2CCLOCK        50000                      //I2C Clock Value   
 #define BaudValue       (Oscillator/(4*I2CCLOCK)) - 1     //Value for SSPADD register (master-mode only)          
-#define i2cdelay        10
+#define i2cdelay        25                              //Target is 200us.  
 
 /* DEFINE SPECIAL SFR NAMES FOR I2CxSTAT REGISTER */
 #define I2CACKBit       SSPCON2bits.ACKDT       //Intelligent mnemonic for defining the ACK/NACK bit.

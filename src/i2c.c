@@ -19,7 +19,7 @@
 
 void I2Cinit( void ) {
 	/* SET ALL THE CORRECT VALUES IN THE I2C CON REGISTER */
-	SMP1 = 0;    //Slew rate control bit (0=Slew Rate Control enabled for high speed mode; 1=Disabled for standard speed)
+	SMP1 = 1;    //Slew rate control bit (0=Slew Rate Control enabled for high speed mode; 1=Disabled for standard speed)
     WCOL1 = 0;   //Write collision detect bit.  Must be cleared in SW.
     SSPOV1 = 0;  //Receiver overflow indicator bit. Must be cleared in SW.
 	SSPCON1bits.SSPM = 8;   //I2C Master Mode. CLOCK RATE = FOSC/(4*(SSPADD+1)) p.298

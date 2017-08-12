@@ -105,7 +105,7 @@ void main()
         
         PrintUnsignedDecimal(gblinfo.int_hum_val);
         DispSendChar('%',false);
-        tick100mDelay(10);
+        tick100mDelay(50);
 
         /* THE FOLLOWING IS THE BATTERY TEST */
         BatteryStatus();        //Determine Battery Voltage
