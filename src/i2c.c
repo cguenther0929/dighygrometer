@@ -29,7 +29,7 @@ void I2Cinit( void ) {
 	SSPADD = BaudValue;      //In master-mode, this is the BAUD rate reload value. (p.298) 
 }
 
-void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {  
+void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {  
 	uint8_t tempaddr = 0;		//Use this as a way to and the R/W bit with the I2CADDR that can be found in the header file
     uint16_t i = 0;
     uint8_t rtndata = 0;		//This will be the returned 16 bit number
@@ -37,13 +37,14 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
 	
-	tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
+    /* WRITE TO I2C ADDRESS OF DEVICE*/
+    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
 
     while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
         
     I2CGenStart = 1; 			        //Generate the start condition
-    while(I2CGenStart == 1);        //Bit will automatically get cleared in HW
-    if (WCOL1 == 1){             //Bus collision detected (p.320)
+    while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
+    if (WCOL1 == 1){                    //Bus collision detected (p.320)
         WCOL1=0;
         return;
     }
@@ -67,25 +68,165 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
 
-    SSPBUF = subaddress;		    //Send the sub address to the slave
     
-    while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
+    /* SEND THE POINTER ADDRESS TO THE CHIP */
+    SSPBUF = subaddress;		        //Send the sub address to the slave
     
-    if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
+    while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
+    
+    if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
         return;
     }
 	
-	/* SEND DATA TO SLAVE */
+	/* SEND UPPER 8 BITS OF DATA TO SLAVE */
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
     
-    SSPBUF = senddata;		        //Send the sub address to the slave
-    while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
+    SSPBUF = (uint8_t)((senddata >> 8) 0xFF);   //Send upper 8 bits of data to slave 
+    while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
 
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
         return;
     }
     
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+    for(i=0;i<i2cdelay;i++);
+    
+    /* SEND LOWER 8 BITS OF DATA TO SLAVE */
+    SSPBUF = (uint8_t)(senddata 0xFF);   //Send upper 8 bits of data to slave 
+    while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
+
+    if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
+        return;
+    }
+
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+    for(i=0;i<i2cdelay;i++);
+    
+    while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+	
+    I2CGenStop = 1;					//Create the STOP condition on the bus
+    while(I2CGenStop == 1);         //Bit automatically cleared in HW
+}
+
+void I2CWrite_8(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {  
+	uint8_t tempaddr = 0;		//Use this as a way to and the R/W bit with the I2CADDR that can be found in the header file
+    uint16_t i = 0;
+    uint8_t rtndata = 0;		//This will be the returned 16 bit number
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+	
+    /* WRITE TO I2C ADDRESS OF DEVICE*/
+    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
+
+    while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+        
+    I2CGenStart = 1; 			        //Generate the start condition
+    while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
+    if (WCOL1 == 1){                    //Bus collision detected (p.320)
+        WCOL1=0;
+        return;
+    }
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+
+    SSPBUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
+
+    if (WCOL1 == 1){             //Bus collision detected (p.320)
+        WCOL1=0;
+        return;
+    }
+
+    while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
+    
+    if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address 
+        return;
+    }
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+
+    
+    /* SEND THE POINTER ADDRESS TO THE CHIP */
+    SSPBUF = subaddress;		        //Send the sub address to the slave
+    
+    while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
+    
+    if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
+        return;
+    }
+	
+	/* SEND DATA BYTE */
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+    
+    SSPBUF = (senddata 0xFF);   //Send upper 8 bits of data to slave 
+    while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
+
+    if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
+        return;
+    }
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+    for(i=0;i<i2cdelay;i++);
+    
+    while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+	
+    I2CGenStop = 1;					//Create the STOP condition on the bus
+    while(I2CGenStop == 1);         //Bit automatically cleared in HW
+}
+
+void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {  
+	uint8_t tempaddr = 0;		//Use this as a way to and the R/W bit with the I2CADDR that can be found in the header file
+    uint16_t i = 0;
+    uint8_t rtndata = 0;		//This will be the returned 16 bit number
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+	
+    /* WRITE TO I2C ADDRESS OF DEVICE*/
+    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
+
+    while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+        
+    I2CGenStart = 1; 			        //Generate the start condition
+    while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
+    if (WCOL1 == 1){                    //Bus collision detected (p.320)
+        WCOL1=0;
+        return;
+    }
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+
+    SSPBUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
+
+    if (WCOL1 == 1){             //Bus collision detected (p.320)
+        WCOL1=0;
+        return;
+    }
+
+    while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
+    
+    if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address 
+        return;
+    }
+    
+    rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
+	for(i=0;i<i2cdelay;i++);
+
+    
+    /* SEND THE POINTER ADDRESS TO THE CHIP */
+    SSPBUF = ptr_address;		        //Send the sub address to the slave
+    
+    while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
+    
+    if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
+        return;
+    }
+	
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
     
@@ -95,7 +236,7 @@ void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {
     while(I2CGenStop == 1);         //Bit automatically cleared in HW
 }
 
-uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
+uint16_t I2CRead(uint8_t baseaddress) {
     uint8_t tempaddr = 0;		//Use this as a way to and the R/W bit with the I2CADDR that can be found in the header file
 	uint8_t rtndata = 0;		//This will be the returned 16 bit number
     uint16_t i = 0;
@@ -106,7 +247,7 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress) {
     rtndata = SSPBUF;                   //Read from SSPBUF to "clean"
 	for(i=0;i<i2cdelay;i++);
 	
-    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSB is Read/n_Write bit
+    tempaddr = (uint8_t)((baseaddress << 1) | I2CREAD);		//LSB is Read/n_Write bit
     
     while((SSPCON2 & 0x1F) >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1 aka is MSSP active?
     

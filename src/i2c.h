@@ -79,7 +79,7 @@ void I2Cinit( void );
 uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress);
 
 /********************************************************  
-*FUNCTION: void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata)
+*FUNCTION: void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata)
 *PURPOSE: Write a BYTE of data over the I2C bus.  
 *PRECONDITION: I2C module must be configured.
 *       Bus needs to be idle. Must pass in proper
@@ -87,6 +87,12 @@ uint8_t I2CRead(uint8_t baseaddress, uint8_t subaddress);
 *POSTCONDITION: BYTE of data written over bus
 *RETURN: Nothing
 ********************************************************/
-void I2CWrite(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata);  
+void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata);  
+
+// TODO need to comment
+void I2CWrite_8(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata);  
+
+// TODO need to comment
+void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address);
 
 #endif

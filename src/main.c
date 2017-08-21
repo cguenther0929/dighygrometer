@@ -100,12 +100,12 @@ void main()
         UpdateTH();             //Report temp and humidity data
         ClearDisp();
         CursorHome();
-        PrintUnsignedDecimal(gblinfo.int_temp_val); 
-        DispSendString("F ");
+        // PrintUnsignedDecimal(gblinfo.int_temp_val); 
+        // DispSendString("F ");
         
-        PrintUnsignedDecimal(gblinfo.int_hum_val);
-        DispSendChar('%',false);
-        tick100mDelay(10);
+        // PrintUnsignedDecimal(gblinfo.int_hum_val);
+        // DispSendChar('%',false);
+        // tick100mDelay(10);
 
         /* THE FOLLOWING IS THE BATTERY TEST */
         // BatteryStatus();        //Determine Battery Voltage
@@ -182,16 +182,9 @@ void SetUp(void)
     tick100mDelay(2);
 
     /* TEMP/HUMIDITY SENSOR CONFIG*/   
-    I2CWrite(HumBaseAddr, HumCtrl1_rw, 0x87); //[7]=Enable Device,[6:3]=Reserved,[2]=High and low register read before update,[1:0]=ODR
+    I2CWrite_16(HumBaseAddr, THConfigReg, THConfigVal);  //See config.h to understand THConfigVal
     tick100mDelay(1);
 
-    I2CWrite(HumBaseAddr, HumAvConf_rw, 0x77); //[7:6]=Reserved,[5:3]=Temp Average,[2:0]=Humidity Average  -- Writing default values
-    tick100mDelay(1);
-
-    I2CWrite(HumBaseAddr, HumCtrl3_rw, 0x04); //[7]=DRDY Active State,[6]DRDY Push/Pull,[5:3]=Reserved,[2]=DRDY En,[1:0]=Reserved
-    tick100mDelay(1);
-
-    TempHumidityInitialize(); //Gather transfer function parameters from stored calibration values
 }
 
 void UpdateTH(void) {
@@ -203,82 +196,27 @@ void UpdateTH(void) {
     uint8_t I2CData;
 
     /* GRAB TEMPERATURE DATA AND CONVERT TO UINT 8 */
-    I2CData = I2CRead(HumBaseAddr, HumTmpHi_r);
-    SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
-    I2CData = I2CRead(HumBaseAddr, HumTmpLo_r);
-    SenseorData = (uint16_t)(SenseorData | I2CData);
 
-    TempFloatVal = (float)(gblinfo.TempSlope * SenseorData + gblinfo.TempInt);
-    TempFloatVal = TempFloatVal * 1.8 + 32;               //Convert number to deg F
+    // I2CData = I2CRead(HumBaseAddr, HumTmpHi_r);
+    // SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
+    // I2CData = I2CRead(HumBaseAddr, HumTmpLo_r);
+    // SenseorData = (uint16_t)(SenseorData | I2CData);
 
-    gblinfo.int_temp_val = (uint8_t)(TempFloatVal);         // Convert to uint 8.  Number will never be negative
+    // TempFloatVal = (float)(gblinfo.TempSlope * SenseorData + gblinfo.TempInt);
+    // TempFloatVal = TempFloatVal * 1.8 + 32;               //Convert number to deg F
+
+    // gblinfo.int_temp_val = (uint8_t)(TempFloatVal);         // Convert to uint 8.  Number will never be negative
 
     /* GRAB HUMIDITY DATA AND CONVERT TO UINT 8 */
-    I2CData = I2CRead(HumBaseAddr, HumHuHi_r);
-    SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
-    I2CData = I2CRead(HumBaseAddr, HumHuLo_r);
-    SenseorData = (uint16_t)(SenseorData | I2CData);
+//     I2CData = I2CRead(HumBaseAddr, HumHuHi_r);
+//     SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
+//     I2CData = I2CRead(HumBaseAddr, HumHuLo_r);
+//     SenseorData = (uint16_t)(SenseorData | I2CData);
 
-    HumFloatVal = (float)(gblinfo.HumSlope * SenseorData + gblinfo.HumInt);
+//     HumFloatVal = (float)(gblinfo.HumSlope * SenseorData + gblinfo.HumInt);
 
-    gblinfo.int_hum_val = (uint8_t)(HumFloatVal);           // Convert to uint 8.  Number will never be negative
-}
-
-void TempHumidityInitialize(void)
-{
-    uint8_t T0degCx8Lo = 0;
-    uint8_t T1degCx8Lo = 0;
-    uint8_t T1T0degmsb = 0;
-    uint16_t T0degCx8 = 0;
-    uint16_t T1degCx8 = 0;
-
-    int16_t T0out = 0;
-    int16_t T1out = 0;
-    uint8_t I2Cdata = 0;
-
-    uint8_t H0rhx2 = 0;
-    uint8_t H1rhx2 = 0;
-    int16_t H0T0out = 0;
-    int16_t H1T0out = 0;
-
-    /* DERIVE LINE EQUATIONS FOR TEMPERATURE SENSOR */
-    T0degCx8Lo = I2CRead(HumBaseAddr, HumT0DegCx8_rw);
-    T1degCx8Lo = I2CRead(HumBaseAddr, HumT1DegCx8_rw);
-    T1T0degmsb = I2CRead(HumBaseAddr, HumT0T1msb_rw);
-
-    T0degCx8 = (uint16_t)(((T1T0degmsb & 0x03) << 8) | T0degCx8Lo);
-    T1degCx8 = (uint16_t)((((T1T0degmsb >> 2) & 0x03) << 8) | T1degCx8Lo);
-
-    I2Cdata = I2CRead(HumBaseAddr, HumT0Hi_rw);
-    T0out = (uint16_t)(I2Cdata << 8);
-    I2Cdata = I2CRead(HumBaseAddr, HumT0Lo_rw);
-    T0out = (uint16_t)(T0out | I2Cdata);
-
-    I2Cdata = I2CRead(HumBaseAddr, HumT1Hi_rw);
-    T1out = (uint16_t)(I2Cdata << 8);
-    I2Cdata = I2CRead(HumBaseAddr, HumT1Lo_rw);
-    T1out = (uint16_t)(T1out | I2Cdata);
-
-    gblinfo.TempSlope = (float)((T1degCx8 - T0degCx8) / ((T1out - T0out) * 8.00)); //Slope of temperature interpolation line
-    gblinfo.TempInt = (float)((T0degCx8 / 8.00) - (gblinfo.TempSlope * T0out));    //Intercept of temperature interpolation line
-
-    /* DERIVE LINE EQUATIONS FOR HUMIDITY SENSOR */
-    H0rhx2 = I2CRead(HumBaseAddr, HumH0rhx2_rw);
-    H1rhx2 = I2CRead(HumBaseAddr, HumH1rhx2_rw);
-
-    I2Cdata = I2CRead(HumBaseAddr, HumH0T0Hi_rw);
-    H0T0out = (int16_t)(I2Cdata << 8);
-    I2Cdata = I2CRead(HumBaseAddr, HumH0T0Lo_rw);
-    H0T0out = (int16_t)(H0T0out | I2Cdata);
-
-    I2Cdata = I2CRead(HumBaseAddr, HumH1T0Hi_rw);
-    H1T0out = (int16_t)(I2Cdata << 8);
-    I2Cdata = I2CRead(HumBaseAddr, HumH1T0Lo_rw);
-    H1T0out = (int16_t)(H1T0out | I2Cdata);
-
-    gblinfo.HumSlope = (float)((H1rhx2 - H0rhx2) / ((H1T0out - H0T0out) * 2.00)); //Slope for humidity transfer function
-    gblinfo.HumInt = (float)((H0rhx2 / 2.00) - (gblinfo.HumSlope * H0T0out));     //Intercept for humidity transfer function
-}
+//     gblinfo.int_hum_val = (uint8_t)(HumFloatVal);           // Convert to uint 8.  Number will never be negative
+// }
 
 void BatteryStatus( void ) {
     uint16_t adcreading = 0;
