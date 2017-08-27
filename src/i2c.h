@@ -60,9 +60,7 @@
 #define I2CStopDetect   SSP1STATbits.P          //Intelligent mnemonic indicating a stop condition was detected
 #define I2CStartDetect  SSP1STATbits.S          //Intelligent mnemonic indicating a start condition was detected
 
-// #define I2C_Active      ((RW1 << 5) | (SEN1 << 4) | (RSEN1 << 3) | (PEN1 << 2) | (RCEN1 << 1) | ACKEN1)) //Indicates when I2C module is active p292 of datasheet 
-#define I2C_Active      ((1 << 5) | (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | 1)) //Indicates when I2C module is active p292 of datasheet 
-// #define I2C_Active      1
+#define I2C_Active      (RW1 + SEN1 + RSEN1 + PEN1 + RCEN1 + ACKEN1) //<< 4) | (RSEN1 << 3) | (PEN1 << 2) | (RCEN1 << 1) | ACKEN1)) //Indicates when I2C module is active p292 of datasheet 
 
 /* I2C BITS AND POLARITY */
 #define I2CREAD			1					    //Define the read bit to be high

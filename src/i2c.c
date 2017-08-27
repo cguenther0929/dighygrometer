@@ -132,7 +132,7 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
     
     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
     // for(i=0;i<i2cdelay;i++);
-    // while(I2C_Active == 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+    // while(I2C_Active >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
     
     ClearDisp(); CursorHome(); DispSendString("**I2C135");      //TODO the following is temporary for debugging;
     SSP1IF = 0;
@@ -154,7 +154,7 @@ void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {
     /* WRITE TO I2C ADDRESS OF DEVICE*/
     tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
 
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
         
     SSP1IF = 0;
     I2CGenStart = 1; 			        //Generate the start condition
@@ -228,7 +228,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
 	
     tempaddr = (uint8_t)((baseaddress << 1) | I2CREAD);		//LSB is Read/n_Write bit
     
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
     
     SSP1IF = 0;
     I2CGenStart = 1; 			        //Generate the start condition
@@ -268,7 +268,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
 	// for(i=0;i<i2cdelay;i++);
     
     /* READ MSB of TEMP DATA */
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
     
     SSP1IF = 0;
     I2CRecEnable = 1;                   //Enable I2C Receiver
@@ -284,7 +284,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
     // while(I2CGenACK == 1);
     
     /* READ LSB of TEMP DATA */
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
     
     SSP1IF = 0;
     I2CRecEnable = 1;
@@ -300,7 +300,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
     // while(I2CGenACK == 1);
 
     /* READ MSB of HUM DATA */
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
     
     SSP1IF = 0;
     I2CRecEnable = 1;
@@ -316,7 +316,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
     // while(I2CGenACK == 1);
 
     /* READ LSB of HUM DATA */
-    while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
+    while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
     
     SSP1IF = 0;
     I2CRecEnable = 1;
@@ -350,7 +350,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
 //     /* WRITE TO I2C ADDRESS OF DEVICE*/
 //     tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
 
-//     while(I2C_Active == 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
+//     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
         
 //     SSP1IF = 0;
 //     I2CGenStart = 1; 			        //Generate the start condition
@@ -434,7 +434,7 @@ uint32_t I2CRead(uint8_t baseaddress) {
     
 //     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
 //     // for(i=0;i<i2cdelay;i++);
-//     // while(I2C_Active == 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
+//     // while(I2C_Active >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
     
 //     ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
 //     DispSendString("**I2C235"); 

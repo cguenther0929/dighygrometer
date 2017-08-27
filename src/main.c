@@ -188,9 +188,9 @@ void SetUp(void)
 }
 
 void UpdateTH(void) {
-    int32_t SensorData;
-    int16_t TempIntVal;
-    int16_t HumIntVal;
+    uint32_t SensorData;
+    uint16_t TemperatureInt;
+    uint16_t HumIntVal;
     float TempFloatVal;
     float HumFloatVal;
     uint8_t I2CData;
@@ -199,14 +199,14 @@ void UpdateTH(void) {
     tick10msDelay(1);                                           //Per page 5/30 of the HDC1080 datasheet, conversion time for 14bits is 6.5ms
     SensorData = I2CRead(THBaseAddr);                           //Reads MSB Temp | LSB Temp | MSB Hum | LSB Hum
     
-    // TempIntVal = (uint16_t)((SensorData >> 16) & 0xFFFF);
-    // HumIntVal = (uint16_t)(SensorData & 0xFFFF);
+    // TemperatureInt = (uint16_t)((SensorData >> 16) & 0xFFFF);
+    HumIntVal = (uint16_t)(SensorData & 0xFFFF);
 
-    // TempFloatVal = float((TempIntVal/397.187878) - 40);       //Per HDC1080 datasheet page 14 of 30
-    // gblinfo.int_temp_val = (uint8_t)(TempFloatVal);
+    // TempFloatVal = float((TemperatureInt/397.187878) - 40);       //Per HDC1080 datasheet page 14 of 30
+    gblinfo.int_temp_val = (uint8_t)(TempFloatVal);
 
-    // HumFloatVal = float(HumIntVal/655.36);                      //Per HDC1080 datasheet page 14/30.  Value in %RH
-    // gblinfo.int_hum_val = (uint8_t)(HumFloatVal);
+    HumFloatVal = float(HumIntVal/655.36);                      //Per HDC1080 datasheet page 14/30.  Value in %RH
+    gblinfo.int_hum_val = (uint8_t)(HumFloatVal);
 }
 
 void BatteryStatus( void ) {
