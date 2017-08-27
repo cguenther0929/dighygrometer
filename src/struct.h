@@ -35,10 +35,6 @@ extern struct GlobalInformation         //Structure to pass information that is 
     uint8_t     int_temp_val;           // Integer value of temperature to be displayed on the screen
     uint8_t     int_hum_val;            // Integer value of humidity to be displayed on the screen
     
-    float       TempSlope;              //Used for linear interpolation of temperature (Line Slope)
-    float       TempInt;                //Used for linear interpolation of temperature  (Line Intercept)
-    float       HumSlope;               //Used for linear interpolation of humidity (Line Slope)
-    float       HumInt;                 //Used for linear interpolation of humidity (Line Intercept)
 } GlobalInformation;
 
 

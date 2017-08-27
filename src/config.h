@@ -51,7 +51,7 @@
 #define TMR0LOW             29                  //Defined assuming 500kHz internal oscillator and prescaler of 1 interrupt every 10ms
 
 /* I2C ADDDRESSES FOR HUMIDITY SENSOR */
-#define HumBaseAddr         0x40            // 7bit address of chip is 0b1000000 -- Full Address is 0b1000000 + R/#W
+#define THBaseAddr          0x40            // 7bit address of chip is 0b1000000 -- Full Address is 0b1000000 + R/#W
 #define THConfigReg         0x20            // Address for configuration register
 #define THValuePointer      0x00            // Pointer address when reading temperature / humidity
 
@@ -59,31 +59,6 @@
                                             // 0b0001 | 0000 | 0000 | 0000 = 0x1000
 #define THConfigVal         0x1000          // [RST(15)][RESERVED(14)][HEAT(13)][MODE(12)] | [BAT STATE(11)][TRES(10)][HRES(9:8)] | RESERVED (7:0)
 
-// #define HumIDReg_r          0x0F
-// #define HumStatReg_r        0x27
-// #define HumHuLo_r           0x28
-// #define HumHuHi_r           0x29
-// #define HumTmpLo_r          0x2A
-// #define HumTmpHi_r          0x2B
-// #define HumAvConf_rw        0x10
-// #define HumCtrl1_rw         0x20
-// #define HumCtrl2_rw         0x21
-// #define HumCtrl3_rw         0x22
-
-// #define HumT0DegCx8_rw      0x32        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumT1DegCx8_rw      0x33        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumT0T1msb_rw       0x35        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read
-// #define HumT0Lo_rw          0x3C        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumT0Hi_rw          0x3D        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumT1Lo_rw          0x3E        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumT1Hi_rw          0x3F        //Temperature-related calibration values used to construct transfer function that allows conversion of digital value read    
-
-// #define HumH0rhx2_rw        0x30        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumH1rhx2_rw        0x31        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumH0T0Lo_rw        0x36        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumH0T0Hi_rw        0x37        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumH1T0Lo_rw        0x3A        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
-// #define HumH1T0Hi_rw        0x3B        //Humidity-related calibration values used to construct transfer function that allows conversion of digital value read    
 
 /* DEFINE VARIOUS PIN FUNCITONS */
 #define output              0           //Define the output pin direction setting

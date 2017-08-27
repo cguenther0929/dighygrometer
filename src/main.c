@@ -91,7 +91,7 @@ void main()
     uint16_t i; 
     SetUp();                    //Initialize hardware
 
-    for(i=0;i<5000;i++);        //Hardware delay for things to stableize
+    for(i=0;i<5000;i++);        //Hardware delay for things to stabilize
     DisplayON();
     
     /* BEGIN SUPER LOOP */
@@ -182,41 +182,32 @@ void SetUp(void)
     tick100mDelay(2);
 
     /* TEMP/HUMIDITY SENSOR CONFIG*/   
-    I2CWrite_16(HumBaseAddr, THConfigReg, THConfigVal);  //See config.h to understand THConfigVal
+    I2CWrite_16(THBaseAddr, THConfigReg, THConfigVal);  //See config.h to understand THConfigVal
     tick100mDelay(1);
 
 }
 
 void UpdateTH(void) {
-    int16_t SenseorData;
+    int32_t SensorData;
     int16_t TempIntVal;
     int16_t HumIntVal;
     float TempFloatVal;
     float HumFloatVal;
     uint8_t I2CData;
 
-    /* GRAB TEMPERATURE DATA AND CONVERT TO UINT 8 */
+    I2CWrite_SetPointer(THBaseAddr,THValuePointer);
+    tick10msDelay(1);                                           //Per page 5/30 of the HDC1080 datasheet, conversion time for 14bits is 6.5ms
+    SensorData = I2CRead(THBaseAddr);                           //Reads MSB Temp | LSB Temp | MSB Hum | LSB Hum
+    
+    // TempIntVal = (uint16_t)((SensorData >> 16) & 0xFFFF);
+    // HumIntVal = (uint16_t)(SensorData & 0xFFFF);
 
-    // I2CData = I2CRead(HumBaseAddr, HumTmpHi_r);
-    // SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
-    // I2CData = I2CRead(HumBaseAddr, HumTmpLo_r);
-    // SenseorData = (uint16_t)(SenseorData | I2CData);
+    // TempFloatVal = float((TempIntVal/397.187878) - 40);       //Per HDC1080 datasheet page 14 of 30
+    // gblinfo.int_temp_val = (uint8_t)(TempFloatVal);
 
-    // TempFloatVal = (float)(gblinfo.TempSlope * SenseorData + gblinfo.TempInt);
-    // TempFloatVal = TempFloatVal * 1.8 + 32;               //Convert number to deg F
-
-    // gblinfo.int_temp_val = (uint8_t)(TempFloatVal);         // Convert to uint 8.  Number will never be negative
-
-    /* GRAB HUMIDITY DATA AND CONVERT TO UINT 8 */
-//     I2CData = I2CRead(HumBaseAddr, HumHuHi_r);
-//     SenseorData = (uint16_t)((I2CData << 8) & 0xFF00);
-//     I2CData = I2CRead(HumBaseAddr, HumHuLo_r);
-//     SenseorData = (uint16_t)(SenseorData | I2CData);
-
-//     HumFloatVal = (float)(gblinfo.HumSlope * SenseorData + gblinfo.HumInt);
-
-//     gblinfo.int_hum_val = (uint8_t)(HumFloatVal);           // Convert to uint 8.  Number will never be negative
-// }
+    // HumFloatVal = float(HumIntVal/655.36);                      //Per HDC1080 datasheet page 14/30.  Value in %RH
+    // gblinfo.int_hum_val = (uint8_t)(HumFloatVal);
+}
 
 void BatteryStatus( void ) {
     uint16_t adcreading = 0;
