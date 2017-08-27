@@ -100,13 +100,17 @@ void main()
         UpdateTH();             //Report temp and humidity data
         ClearDisp();
         CursorHome();
-        // PrintUnsignedDecimal(gblinfo.int_temp_val); 
-        // DispSendString("F ");
+        PrintUnsignedDecimal(gblinfo.int_temp_val); 
+        DispSendString("F ");
         
-        // PrintUnsignedDecimal(gblinfo.int_hum_val);
-        // DispSendChar('%',false);
-        // tick100mDelay(10);
-
+        PrintUnsignedDecimal(gblinfo.int_hum_val);
+        DispSendChar('%',false);
+        tick100mDelay(20);
+        
+        ClearDisp(); CursorHome();
+        DispSendString("BV "); PrintUnsignedDecimal(BaudValue);
+        tick100mDelay(20);
+        
         /* THE FOLLOWING IS THE BATTERY TEST */
         // BatteryStatus();        //Determine Battery Voltage
         // if(gblinfo.bat_low == true) {
@@ -117,13 +121,13 @@ void main()
         //     tick100mDelay(10);
         // }
 
-        DisplayOFF();                   //Sleep display for ultra low power draw
+        // DisplayOFF();                   //Sleep display for ultra low power draw
         
-        gblinfo.wakeedge = false;       //Reset this flag
-        while(!gblinfo.wakeedge);       //Wait for rising edge on interrupt pin
-        gblinfo.wakeedge = false;       //Reset this flag
+        // gblinfo.wakeedge = false;       //Reset this flag
+        // while(!gblinfo.wakeedge);       //Wait for rising edge on interrupt pin
+        // gblinfo.wakeedge = false;       //Reset this flag
 
-        DisplayON();                    //Dispaly on so we can print out info
+        // DisplayON();                    //Dispaly on so we can print out info
 
     }                           //END while(1) SUPER LOOP
 } //END Main()
@@ -151,7 +155,7 @@ void SetUp(void)
     DISP_PWR_EN_n = 1;                  //Display off by default 
 
     /* PIN DIRECTIONS FOR LCD */
-    //Defined in display init funciton since function that removes power from display sets these to HI-Z each time
+    //Defined in display init function since function that removes power from display sets these to HI-Z each time
    
     gblinfo.wakeedge = false;    
     
