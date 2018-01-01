@@ -37,27 +37,21 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
     WCOL1 = 0;                           //Write collision detect bit.  Must be cleared in SW.
     SSPOV1 = 0;                          //Receiver overflow indicator bit. Must be cleared in SW.
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-	
     /* WRITE TO I2C ADDRESS OF DEVICE*/
-    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
+    tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSB is Read/n_Write bit
 
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
         
     SSP1IF = 0;
     I2CGenStart = 1; 			        //Generate the start condition
-    // while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
     while(SSP1IF == 0);                 //Start condition will generate an interrupt 
     if (WCOL1 == 1){                    //Bus collision detected (p.320).  If not collided here, we should own the bus from here on out.
         WCOL1=0;
-        ClearDisp(); CursorHome(); DispSendString("**I2C51");         //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C51");          //TODO the following is temporary for debugging;
+        while(TRUE);        //TODO remove
         return;
     }
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-
     SSP1BUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
 
     if (WCOL1 == 1){            //Verify no collision after each write to SSP1BUF (p.317)
@@ -66,16 +60,13 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
     }
 
     SSP1IF = 0;
-    // while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
     if(I2CACKStat == NACK){         //Slave did not acknowledge transmission of base address 
-        ClearDisp(); CursorHome(); DispSendString("**I2C70"); while(TRUE);      //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C70"); 
+        while(TRUE);      //TODO the following is temporary for debugging;
         return;
     }
-    
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
     
     /* SEND THE POINTER ADDRESS TO THE CHIP */
     SSP1IF = 0;
@@ -86,34 +77,28 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
         return;
     }
     
-    // while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
     if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
-        ClearDisp(); CursorHome(); DispSendString("**I2C91"); while(TRUE);      //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C91"); 
+        while(TRUE);      //TODO the following is temporary for debugging;
         return;
     }
 	
 	/* SEND UPPER 8 BITS OF DATA TO SLAVE */
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-    
     SSP1IF = 0;
     SSP1BUF = (uint8_t)((senddata >> 8) & 0xFF);   //Send upper 8 bits of data to slave 
     if (WCOL1 == 1){            //Verify no collision after each write to SSP1BUF (p.317)
         WCOL1=0;
         return;
     }
-    // while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
+    
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-
+    
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
         ClearDisp(); CursorHome(); DispSendString("**I2C109"); while(TRUE);      //TODO the following is temporary for debugging;    
         return;
     }
-    
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-    // for(i=0;i<i2cdelay;i++);
     
     /* SEND LOWER 8 BITS OF DATA TO SLAVE */
     SSP1IF = 0;
@@ -122,7 +107,7 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
         WCOL1=0;
         return;
     }
-    // while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
+    
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
@@ -130,15 +115,10 @@ void I2CWrite_16(uint8_t baseaddress, uint8_t subaddress, uint16_t senddata) {
         return;
     }
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-    // for(i=0;i<i2cdelay;i++);
-    // while(I2C_Active >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
     
-    ClearDisp(); CursorHome(); DispSendString("**I2C135");      //TODO the following is temporary for debugging;
     SSP1IF = 0;
     I2CGenStop = 1;					//Create the STOP condition on the bus
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-    // while(I2CGenStop == 1);         //Bit automatically cleared in HW
 }
 
 
@@ -162,13 +142,10 @@ void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {
     while(SSP1IF == 0);                 //Start condition will generate an interrupt 
     if (WCOL1 == 1){                    //Bus collision detected (p.320).  If not collided here, we should own the bus from here on out.
         WCOL1=0;
-        ClearDisp(); CursorHome(); DispSendString("**I2C162");      //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C162");while(TRUE);      //TODO the following is temporary for debugging;
         return;
     }
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-
     SSP1BUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
     if (WCOL1 == 1){            //Verify no collision after each write to SSP1BUF (p.317)
         WCOL1=0;
@@ -177,17 +154,12 @@ void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {
     }
 
     SSP1IF = 0;
-    // while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
     if(I2CACKStat == NACK){         //Slave did not acknowledge transmission of base address 
         ClearDisp(); CursorHome(); DispSendString("**I2C181"); while(TRUE);      //TODO the following is temporary for debugging;    
         return;
     }
-    
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-
     
     /* SEND THE POINTER ADDRESS TO THE CHIP */
     SSP1IF = 0;
@@ -199,7 +171,6 @@ void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {
         return;
     }
     
-    // while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
     if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
@@ -208,11 +179,9 @@ void I2CWrite_SetPointer(uint8_t baseaddress, uint8_t ptr_address) {
     }
 
     /* GENERATE THE STOP CONDITION ON THE BUS */
-    ClearDisp(); CursorHome(); DispSendString("**I2C217");      //TODO the following is temporary for debugging;
     SSP1IF = 0;
     I2CGenStop = 1;					//Create the STOP condition on the bus
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-    // while(I2CGenStop == 1);         //Bit automatically cleared in HW
 }
 
 uint32_t I2CRead(uint8_t baseaddress) {
@@ -223,21 +192,17 @@ uint32_t I2CRead(uint8_t baseaddress) {
     WCOL1 = 0;                           //Write collision detect bit.  Must be cleared in SW.
     SSPOV1 = 0;                          //Receiver overflow indicator bit. Must be cleared in SW.
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-	
     tempaddr = (uint8_t)((baseaddress << 1) | I2CREAD);		//LSB is Read/n_Write bit
     
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
     
     SSP1IF = 0;
     I2CGenStart = 1; 			        //Generate the start condition
-    // while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
     while(SSP1IF == 0);                 //Start condition will generate an interrupt 
     
     if (WCOL1 == 1){                     //Bus collision detected (p.320)
         WCOL1=0;
-        ClearDisp(); CursorHome(); DispSendString("**I2C238");      //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C238");while(TRUE);      //TODO the following is temporary for debugging;
         return 0;
     }
     
@@ -247,32 +212,24 @@ uint32_t I2CRead(uint8_t baseaddress) {
     
     if (WCOL1 == 1){            //Verify no collision after each write to SSP1BUF (p.317)
         WCOL1=0;
-        ClearDisp(); CursorHome(); DispSendString("**I2C247");      //TODO the following is temporary for debugging;
+        ClearDisp(); CursorHome(); DispSendString("**I2C247");while(TRUE);      //TODO the following is temporary for debugging;
         return;
     }
     
     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
     
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
-    
-    // while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
-    // for(i=0;i<i2cdelay;i++);    //Some delay for safety
-    
-    if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address 
-        ClearDisp(); CursorHome(); DispSendString("**I2C261"); while(TRUE);      //TODO the following is temporary for debugging;
-        return 0;
+    if(I2CACKStat == NACK){     //Slave did not acknowledge transmission of base address  //TODO this is where I was getting errors! Pick back up here.  
+        ClearDisp(); CursorHome(); DispSendString("**I2C261"); 
+        while(TRUE);      //TODO the following is temporary for debugging;
+        rtndata = 0x00000000;
+        return (rtndata);
     }
-    
-    // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-	// for(i=0;i<i2cdelay;i++);
     
     /* READ MSB of TEMP DATA */
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
     
     SSP1IF = 0;
     I2CRecEnable = 1;                   //Enable I2C Receiver
-    // while(I2CRecEnable == 1);
     while(SSP1IF == 0);                 //When all eight bits received RCEN cleared in HW, and BF and SSP1IF automatically set
     
     rtndata = SSP1BUF;               //Should automatically clear BF flag (defined by I2CBF)
@@ -281,7 +238,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CGenACK = 1;                      //Assert acknowledge on I2C bus for slave to see
     while(SSP1IF == 0);
-    // while(I2CGenACK == 1);
     
     /* READ LSB of TEMP DATA */
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
@@ -289,7 +245,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CRecEnable = 1;
     while(SSP1IF == 0);                 //When all eight bits received RCEN cleared in HW, and BF and SSP1IF automatically set
-    // while(I2CRecEnable == 1);
     
     rtndata = ((rtndata << 8) | SSP1BUF);               //Should automatically clear BF flag (defined by I2CBF)
     
@@ -297,7 +252,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CGenACK = 1;                  //Assert NACK to indicate slave we are finishing the transaction 
     while(SSP1IF == 0);
-    // while(I2CGenACK == 1);
 
     /* READ MSB of HUM DATA */
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
@@ -305,7 +259,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CRecEnable = 1;
     while(SSP1IF == 0);                 //When all eight bits received RCEN cleared in HW, and BF and SSP1IF automatically set
-    // while(I2CRecEnable == 1);
     
     rtndata = ((rtndata << 8) | SSP1BUF);               //Should automatically clear BF flag (defined by I2CBF)
     
@@ -313,7 +266,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CGenACK = 1;                  //Assert NACK to indicate slave we are finishing the transaction 
     while(SSP1IF == 0);
-    // while(I2CGenACK == 1);
 
     /* READ LSB of HUM DATA */
     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set.  RCEN ignored if I2C "active" when we try to set
@@ -321,7 +273,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CRecEnable = 1;
     while(SSP1IF == 0);                 //When all eight bits received RCEN cleared in HW, and BF and SSP1IF automatically set
-    // while(I2CRecEnable == 1);
     
     rtndata = ((rtndata << 8) | SSP1BUF);               //Should automatically clear BF flag (defined by I2CBF)
     
@@ -329,7 +280,6 @@ uint32_t I2CRead(uint8_t baseaddress) {
     SSP1IF = 0;
     I2CGenACK = 1;                  //Assert NACK to indicate slave we are finishing the transaction 
     while(SSP1IF == 0);
-    // while(I2CGenACK == 1);
 
     /* GENERATE STOP CONDITION */
     SSP1IF = 0;
@@ -338,108 +288,3 @@ uint32_t I2CRead(uint8_t baseaddress) {
     
     return (rtndata);               //Return data in form xxxxxx(b9)(b8)(b7)(b6)(b5)(b4)(b3)(b2)(b1)(b0)
 }
-
-// void I2CWrite_8(uint8_t baseaddress, uint8_t subaddress, uint8_t senddata) {  
-// 	uint8_t tempaddr = 0;		
-//     uint16_t i = 0;
-//     uint8_t rtndata = 0;		
-    
-//     rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-// 	for(i=0;i<i2cdelay;i++);
-    
-//     /* WRITE TO I2C ADDRESS OF DEVICE*/
-//     tempaddr = (uint8_t)((baseaddress << 1) | I2CWRITE);		//LSP is Read/n_Write bit
-
-//     while(I2C_Active >= 1);             //Checking if R_nW | ACKEN | RCEN | PEN | RSEN | SEN is set
-        
-//     SSP1IF = 0;
-//     I2CGenStart = 1; 			        //Generate the start condition
-//     // while(I2CGenStart == 1);            //Bit will automatically get cleared in HW
-//     while(SSP1IF == 0);                 //Start condition will generate an interrupt 
-//     if (WCOL1 == 1){                    //Bus collision detected (p.320).  If not collided here, we should own the bus from here on out.
-//         WCOL1=0;
-//         return;
-//     }
-    
-//     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-// 	// for(i=0;i<i2cdelay;i++);
-
-//     SSP1BUF = tempaddr;			//Load the address and r/w bits into the transmit buffer
-
-//     // if (WCOL1 == 1){             //Bus collision detected (p.320)
-//     //     WCOL1=0;
-//     //     return;
-//     // }
-
-//     // while(I2CTXBusy == 1);		//Wait for the 8 clock cycles to transmit the data
-//     SSP1IF = 0;
-//     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-    
-//     if(I2CACKStat == NACK){         //Slave did not acknowledge transmission of base address 
-//         ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
-//         DispSendString("**I2C70");      
-//         while(TRUE);                    //TODO need to remove this line
-//         return;
-//     }
-    
-//     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-// 	// for(i=0;i<i2cdelay;i++);
-
-    
-//     /* SEND THE POINTER ADDRESS TO THE CHIP */
-//     SSP1IF = 0;
-//     SSP1BUF = subaddress;		        //Send the sub address to the slave
-    
-//     // while(I2CTXBusy == 1);		        //Wait for the 8 clock cycles to transmit the data
-//     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-    
-//     if(I2CACKStat == NACK){             //Slave did not acknowledge transmission of base address 
-//         ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
-//         DispSendString("**I2C193");      
-//         while(TRUE);                    //TODO need to remove this line
-//         return;
-//     }
-    
-// 	/* SEND UPPER 8 BITS OF DATA TO SLAVE */
-//     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-// 	// for(i=0;i<i2cdelay;i++);
-    
-//     SSP1IF = 0;
-//     SSP1BUF = (uint8_t)((senddata >> 8) 0xFF);   //Send upper 8 bits of data to slave 
-//     // while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
-//     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-
-//     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-//         ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
-//         DispSendString("**I2C209");      
-//         while(TRUE);                    //TODO need to remove this line
-//         return;
-//     }
-    
-//     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-//     // for(i=0;i<i2cdelay;i++);
-    
-//     /* SEND LOWER 8 BITS OF DATA TO SLAVE */
-//     SSP1IF = 0;
-//     SSP1BUF = (uint8_t)(senddata 0xFF);   //Send upper 8 bits of data to slave 
-//     // while(I2CTXBusy == 1);		                //Wait for the 8 clock cycles to transmit the data
-//     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-    
-//     if(I2CACKStat == NACK){        //Slave did not acknowledge transmission of base address 
-//         ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
-//         DispSendString("**I2C225");      
-//         while(TRUE);                    //TODO need to remove this line
-//         return;
-//     }
-    
-//     // rtndata = SSP1BUF;                   //Read from SSP1BUF to "clean"
-//     // for(i=0;i<i2cdelay;i++);
-//     // while(I2C_Active >= 1);       //Checking if ACKEN, RCEN, PEN, RSEN, or SEN is 1
-    
-//     ClearDisp();CursorHome();       //TODO the following is temporary for debugging;
-//     DispSendString("**I2C235"); 
-//     SSP1IF = 0;
-//     I2CGenStop = 1;					//Create the STOP condition on the bus
-//     while(SSP1IF == 0);		        //Interrupt shall be created on 9th clock cycle after ACK/NACK bit received by the master
-//     // while(I2CGenStop == 1);         //Bit automatically cleared in HW
-// }

@@ -46,13 +46,17 @@
 #define disp_command        0
 #define disp_data           1
 
+/* DEFINE UNUSED PINS */
+#define NC1                 LATAbits.LATA1
+
+
 /* REGISTER VALUES FOR TIME BASE */         
 #define TMR0HIGH            251                 //Defined assuming 500kHz internal oscillator and prescaler of 1 interrupt every 10ms 
 #define TMR0LOW             29                  //Defined assuming 500kHz internal oscillator and prescaler of 1 interrupt every 10ms
 
 /* I2C ADDDRESSES FOR HUMIDITY SENSOR */
 #define THBaseAddr          0x40            // 7bit address of chip is 0b1000000 -- Full Address is 0b1000000 + R/#W
-#define THConfigReg         0x20            // Address for configuration register
+#define THConfigReg         0x02            // Address for configuration register
 #define THValuePointer      0x00            // Pointer address when reading temperature / humidity
 
 // The following is the configuration register of the part, whose reset value is 0x1000

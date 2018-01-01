@@ -123,7 +123,7 @@ void interrupt low_priority main_isr( void ) {
     if(INT1IF){
         INTCON3bits.INT1IF = 0;     //Clear the interrupt flag
         if(RB1 == 1){
-            gblinfo.wakeedge = true;
+            gblinfo.wakeedge = true;        //This feature is no longer used -- replaced by sleep function
         }
     }
     

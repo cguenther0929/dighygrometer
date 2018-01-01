@@ -21,7 +21,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "eeprom.h"
 #include "i2c.h"
 #include "struct.h"
 #include "isr.h"

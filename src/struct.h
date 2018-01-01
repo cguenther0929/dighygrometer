@@ -25,7 +25,7 @@
 extern struct GlobalInformation         //Structure to pass information that is shared among modules
 {
     bool        bat_low;                //Flag will be set if battery voltage detected too low
-    bool        wakeedge;               //Set this flag if we get an interrupt on INTx pin
+    bool        wakeedge;               //Set this flag if we get an interrupt on INTx pin (feature no longer used)
     float       battery_voltage;        //Container for measured battery voltage
     
     uint16_t    tick10ms;               //Increases every 50mili tick1000monds 

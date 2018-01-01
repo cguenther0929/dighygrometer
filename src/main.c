@@ -21,12 +21,12 @@
 // CONFIG1L
 #pragma config RETEN = OFF      // VREG Sleep Enable bit (Disabled - Controlled by SRETEN bit)
 #pragma config INTOSCSEL = HIGH // LF-INTOSC Low-power Enable bit (LF-INTOSC in High-power mode during Sleep)
-// #pragma config INTOSCSEL = LOW  // LF-INTOSC Low-power Enable bit (LF-INTOSC in Low-power mode during Sleep)
 #pragma config SOSCSEL = DIG    // SOSC Power Selection and mode Configuration bits (Digital (SCLKI) mode)
 #pragma config XINST = OFF      // Extended Instruction Set (Disabled)
 
 // CONFIG1H
 #pragma config FOSC = INTIO1    // Oscillator (Internal RC oscillator) with output on OSC2.  p45/550.  default IRCF<2:0> = 110 = 8MHz (on pin 8MHz/4 = 2MHz)
+// #pragma config FOSC = INTIO2    // Oscillator (Internal RC oscillator) with output on OSC2.  p45/550.  default IRCF<2:0> = 110 = 8MHz (on pin 8MHz/4 = 2MHz)
 #pragma config PLLCFG = OFF     // PLL x4 Enable bit (Disabled)
 #pragma config FCMEN = OFF      // Fail-Safe Clock Monitor (Disabled)
 #pragma config IESO = OFF       // Internal External Oscillator Switch Over Mode (Disabled)
@@ -38,7 +38,6 @@
 #pragma config BORPWR = ZPBORMV // BORMV Power level (ZPBORMV instead of BORMV is selected)
 
 // CONFIG2H
-// #pragma config WDTEN = ON       // Watchdog Timer (WDT controlled by SWDTEN bit setting)
 #pragma config WDTEN = OFF       // Watchdog Timer (WDT controlled by SWDTEN bit setting)
 #pragma config WDTPS = 1024     // Watchdog Postscaler (1:1024)
 
@@ -89,14 +88,15 @@ struct GlobalInformation gblinfo;
 void main()
 {
     uint16_t i; 
+    for(i=0;i<50000;i++);        //Hardware delay for things to stabilize
+    for(i=0;i<50000;i++);        //Hardware delay for things to stabilize
+    
     SetUp();                    //Initialize hardware
 
-    for(i=0;i<5000;i++);        //Hardware delay for things to stabilize
-    DisplayON();
-    
     /* BEGIN SUPER LOOP */
     while (true)
     {
+        DisplayON();
         UpdateTH();             //Report temp and humidity data
         ClearDisp();
         CursorHome();
@@ -107,28 +107,15 @@ void main()
         DispSendChar('%',false);
         tick100mDelay(20);
         
+        BatteryStatus();        //Determine Battery Voltage
         ClearDisp(); CursorHome();
-        DispSendString("BV "); PrintUnsignedDecimal(BaudValue);
-        tick100mDelay(20);
+        DispSendString("BV ");  PrintFloat(gblinfo.battery_voltage);
+        tick100mDelay(15);
+
+        DisplayOFF();                   //Sleep display for ultra low power draw
+
+        SLEEP();                        //Place device in sleep mode for ultra low power draw -- rising edge on int0 will wake device 
         
-        /* THE FOLLOWING IS THE BATTERY TEST */
-        // BatteryStatus();        //Determine Battery Voltage
-        // if(gblinfo.bat_low == true) {
-        //     ClearDisp();
-        //     CursorHome();
-        //     PrintFloat(gblinfo.battery_voltage);
-        //     DispSendChar('*',false);
-        //     tick100mDelay(10);
-        // }
-
-        // DisplayOFF();                   //Sleep display for ultra low power draw
-        
-        // gblinfo.wakeedge = false;       //Reset this flag
-        // while(!gblinfo.wakeedge);       //Wait for rising edge on interrupt pin
-        // gblinfo.wakeedge = false;       //Reset this flag
-
-        // DisplayON();                    //Dispaly on so we can print out info
-
     }                           //END while(1) SUPER LOOP
 } //END Main()
 
@@ -145,11 +132,11 @@ void SetUp(void)
     for(i=0;i<500;i++);     //Give the clock some time to stablize
 
     /* PIN DIRECTION FOR DBG GPIO */
-    TRISB5 = output; //Port pin attached to the Heartbeat LED
+    TRISB5 = output;        //Port pin attached to the Heartbeat LED
 
     /* PIN DIRECTIONS FOR I2C */
-    TRISC3 = input; //I2C SCK. Must be defined as input
-    TRISC4 = input; //I2C SDA. Must be defined as input
+    TRISC3 = input;         //I2C SCK. Must be defined as input
+    TRISC4 = input;         //I2C SDA. Must be defined as input
 
     /* PIN DIRECTION FOR POWER CONTROL SIGNALS */   
     DISP_PWR_EN_n = 1;                  //Display off by default 
@@ -178,6 +165,43 @@ void SetUp(void)
     ANCON1 = 0x00; //Analog channel 10-8 are configred for digital inputs. p.364
     EnableAnalogCh(0);
 
+    /* UNUSED PINS SET TO OUTPUTS FOR POWER CONSUMPTION */
+    // TRISA1 = output; LATAbits.LATA1 = 0;             //Putting these lines in play appears to brick operation
+    // TRISA3 = output; LATAbits.LATA3 = 0;
+    // TRISA4 = output; LATAbits.LATA4 = 0;
+    // TRISA5 = output; LATAbits.LATA5 = 0;
+
+    TRISB0 = output; LATBbits.LATB0 = 0;
+    TRISB2 = output; LATBbits.LATB2 = 0;
+    TRISB3 = output; LATBbits.LATB3 = 0;
+    TRISB4 = output; LATBbits.LATB4 = 0;
+
+    TRISC0 = output; LATCbits.LATC0 = 0;
+    TRISC1 = output; LATCbits.LATC1 = 0;
+    TRISC2 = output; LATCbits.LATC2 = 0;
+    TRISC5 = output; LATCbits.LATC5 = 0;
+    TRISC6 = output; LATCbits.LATC6 = 0;
+    TRISC7 = output; LATCbits.LATC7 = 0;
+
+    TRISG0 = output; LATGbits.LATG0 = 0;
+    TRISG1 = output; LATGbits.LATG1 = 0;
+    TRISG2 = output; LATGbits.LATG2 = 0;
+    TRISG3 = output; LATGbits.LATG3 = 0;
+    TRISG4 = output; LATGbits.LATG4 = 0;
+
+    TRISF1 = output; LATFbits.LATF1 = 0;
+    TRISF2 = output; LATFbits.LATF2 = 0;
+    TRISF3 = output; LATFbits.LATF3 = 0;
+    TRISF4 = output; LATFbits.LATF4 = 0;
+    TRISF5 = output; LATFbits.LATF5 = 0;
+    TRISF6 = output; LATFbits.LATF6 = 0;
+    TRISF7 = output; LATFbits.LATF7 = 0;
+
+    TRISE3 = output; LATEbits.LATE3 = 0;
+    TRISE4 = output; LATEbits.LATE4 = 0;
+    TRISE5 = output; LATEbits.LATE5 = 0;
+    TRISE6 = output; LATEbits.LATE6 = 0;
+
     Timer0Init(1, 1, 0); //ARGS: interrupts = yes, prescaler = 1, clksource = FOSC/4 (8MHz / 4 in this application)
     Timer0On();
 
@@ -200,15 +224,19 @@ void UpdateTH(void) {
     uint8_t I2CData;
 
     I2CWrite_SetPointer(THBaseAddr,THValuePointer);
-    tick10msDelay(1);                                           //Per page 5/30 of the HDC1080 datasheet, conversion time for 14bits is 6.5ms
+    tick10msDelay(10);                                           //Per page 5/30 of the HDC1080 datasheet, conversion time for 14bits is 6.5ms
     SensorData = I2CRead(THBaseAddr);                           //Reads MSB Temp | LSB Temp | MSB Hum | LSB Hum
     
     TemperatureInt = (uint16_t)((SensorData >> 16) & 0xFFFF);
+    // TemperatureInt = (uint16_t)((SensorData >> 18) & 0x3FFF);           //Need 14 bits of temperature data
     HumIntVal = (uint16_t)(SensorData & 0xFFFF);
+    // HumIntVal = (uint16_t)((SensorData >> 2) & 0x3FFF);                 //Grab 14 bits of humidity data
 
-    TempFloatVal = (float)((TemperatureInt/397.187878) - 40);       //Per HDC1080 datasheet page 14 of 30
+    TempFloatVal = (float)((TemperatureInt/397.187878) - 40);       //Per HDC1080 datasheet page 14 of 30 -- Temperature value in C!
+    TempFloatVal = (float)(((TempFloatVal*(1.8)) + 32));       //Per HDC1080 datasheet page 14 of 30 -- Temperature value in C!
     gblinfo.int_temp_val = (uint8_t)(TempFloatVal);
 
+    // HumFloatVal = (float)(HumIntVal*0.00153);                      //Per HDC1080 datasheet page 14/30.  Value in %RH
     HumFloatVal = (float)(HumIntVal/655.36);                      //Per HDC1080 datasheet page 14/30.  Value in %RH
     gblinfo.int_hum_val = (uint8_t)(HumFloatVal);
 }
