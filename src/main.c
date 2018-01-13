@@ -34,7 +34,7 @@
 // CONFIG2L
 #pragma config PWRTEN = ON      // Power Up Timer (Enabled)
 #pragma config BOREN = SBORDIS  // Brown Out Detect (Enabled in hardware, SBOREN disabled)
-#pragma config BORV = 1         // Brown-out Reset Voltage bits (2.7V)
+#pragma config BORV = 2         // Brown-out Reset Voltage bits (2.0V)
 #pragma config BORPWR = ZPBORMV // BORMV Power level (ZPBORMV instead of BORMV is selected)
 
 // CONFIG2H
@@ -89,7 +89,6 @@ void main()
 {
     uint16_t i; 
     for(i=0;i<50000;i++);        //Hardware delay for things to stabilize
-    for(i=0;i<50000;i++);        //Hardware delay for things to stabilize
     
     SetUp();                    //Initialize hardware
 
@@ -127,9 +126,7 @@ void SetUp(void)
     MFIOSEL = 1;
     IRCF2 = 0; IRCF1 = 1; IRCF0 = 0;
     
-    for(i=0;i<500;i++);     //Give the clock some time to stablize
-    for(i=0;i<500;i++);     //Give the clock some time to stablize
-    for(i=0;i<500;i++);     //Give the clock some time to stablize
+    for(i=0;i<500;i++);     //Give the clock some time to stabilize
 
     /* PIN DIRECTION FOR DBG GPIO */
     TRISB5 = output;        //Port pin attached to the Heartbeat LED
@@ -166,10 +163,10 @@ void SetUp(void)
     EnableAnalogCh(0);
 
     /* UNUSED PINS SET TO OUTPUTS FOR POWER CONSUMPTION */
-    // TRISA1 = output; LATAbits.LATA1 = 0;             //Putting these lines in play appears to brick operation
-    // TRISA3 = output; LATAbits.LATA3 = 0;
-    // TRISA4 = output; LATAbits.LATA4 = 0;
-    // TRISA5 = output; LATAbits.LATA5 = 0;
+    TRISA1 = output; LATAbits.LATA1 = 0;             //Putting these lines in play appears to brick operation
+    TRISA3 = output; LATAbits.LATA3 = 0;
+    TRISA4 = output; LATAbits.LATA4 = 0;
+    TRISA5 = output; LATAbits.LATA5 = 0;
 
     TRISB0 = output; LATBbits.LATB0 = 0;
     TRISB2 = output; LATBbits.LATB2 = 0;
@@ -204,7 +201,7 @@ void SetUp(void)
 
     Timer0Init(1, 1, 0); //ARGS: interrupts = yes, prescaler = 1, clksource = FOSC/4 (8MHz / 4 in this application)
     Timer0On();
-
+    
     /* I2C START UP*/   
     I2Cinit();
     tick100mDelay(2);
