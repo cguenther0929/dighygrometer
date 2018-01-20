@@ -104,12 +104,14 @@ void main()
         
         PrintUnsignedDecimal(gblinfo.int_hum_val);
         DispSendChar('%',false);
-        tick100mDelay(20);
+        tick100mDelay(15);
         
         BatteryStatus();        //Determine Battery Voltage
-        ClearDisp(); CursorHome();
-        DispSendString("BV ");  PrintFloat(gblinfo.battery_voltage);
-        tick100mDelay(15);
+        if(gblinfo.battery_voltage <= 2.6) {
+            ClearDisp(); CursorHome();
+            DispSendString("BV ");  PrintFloat(gblinfo.battery_voltage);
+            tick100mDelay(15);
+        }
 
         DisplayOFF();                   //Sleep display for ultra low power draw
 
